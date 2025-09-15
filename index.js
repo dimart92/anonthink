@@ -1,7 +1,7 @@
 const { Telegraf } = require('telegraf');
 
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
-const channelId = process.env.CHANNEL_ID;          // строка "-1002909199388"
+const channelId = process.env.CHANNEL_ID;
 
 bot.start(ctx => ctx.reply('Отправь anything → опубликую анонимно.'));
 bot.on('text', ctx => ctx.telegram.sendMessage(channelId, ctx.message.text));
@@ -12,10 +12,7 @@ bot.on('video', ctx => ctx.telegram.sendVideo(channelId, ctx.message.video.file_
 bot.on('document', ctx => ctx.telegram.sendDocument(channelId, ctx.message.document.file_id,
                                                    { caption: ctx.message.caption || '' }));
 
-// экспортируем функцию, которую Vercel вызывает за нас
 module.exports = (req, res) => {
-  // если запрос не POST — сразу 405 (Telegram шлёт только POST)
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-  // передаём управление Telegraf
   return bot.webhookCallback(`/webhook/${process.env.TELEGRAM_TOKEN}`)(req, res);
 };
