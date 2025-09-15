@@ -2,13 +2,13 @@ import os, asyncio, logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils.executor import start_webhook
 
-TOKEN   = os.environ["8356896546:AAFvXuH97dQi6xKOQoWzbPyzU4xSdRCydZ4"]
-CHANNEL = int(os.environ["-1002909199388"])
+TOKEN   = os.environ["TELEGRAM_TOKEN"]
+CHANNEL = int(os.environ["CHANNEL_ID"])
 
 WEBHOOK_PATH = f'/webhook/{TOKEN}'
-WEBHOOK_URL  = os.environ["https://anonthink.vercel.app"] + WEBHOOK_PATH
+WEBHOOK_URL  = os.environ["VERCEL_URL"] + WEBHOOK_PATH
 
-bot = Bot(token=8356896546:AAFvXuH97dQi6xKOQoWzbPyzU4xSdRCydZ4, parse_mode="HTML")
+bot = Bot(token=TOKEN, parse_mode="HTML")
 dp  = Dispatcher(bot)
 logging.basicConfig(level=logging.INFO)
 
