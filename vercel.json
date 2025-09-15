@@ -1,13 +1,13 @@
 {
   "functions": {
-    "main.py": {
-      "runtime": "vercel-python"
+    "index.js": {
+      "runtime": "nodejs18.x"
     }
   },
   "routes": [
     {
       "src": "/webhook/(.*)",
-      "dest": "main.py"
+      "dest": "index.js"
     }
   ]
 }
