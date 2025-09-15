@@ -1,0 +1,6 @@
+{
+  "name": "anon-tg-publisher",
+  "dependencies": {
+    "telegraf": "^4.15.0"
+  }
+}
