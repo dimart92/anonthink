@@ -12,5 +12,10 @@ bot.on('video', ctx => ctx.telegram.sendVideo(channelId, ctx.message.video.file_
 bot.on('document', ctx => ctx.telegram.sendDocument(channelId, ctx.message.document.file_id,
                                                    { caption: ctx.message.caption || '' }));
 
-// экспортируем обработчик, который Vercel вызовет по пути /webhook/...
-module.exports = bot.webhookCallback(`/webhook/${process.env.TELEGRAM_TOKEN}`);
+// экспортируем функцию, которую Vercel вызывает за нас
+module.exports = (req, res) => {
+  // если запрос не POST — сразу 405 (Telegram шлёт только POST)
+  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+  // передаём управление Telegraf
+  return bot.webhookCallback(`/webhook/${process.env.TELEGRAM_TOKEN}`)(req, res);
+};
