@@ -9,7 +9,7 @@ const pending = new Map();
 
 /* ---------- команды пользователя ---------- */
 bot.start(ctx =>
-  ctx.reply('Привет! Напиши что на душе.')
+  ctx.reply('Привет! Напиши что на душе')
 );
 
 bot.on('text', async ctx => {
@@ -17,7 +17,7 @@ bot.on('text', async ctx => {
   const userId   = ctx.message.from.id;
 
   // 1. Отвечаем пользователю
-  await ctx.reply('Спасибо, что поделился! В скором времени твоя мысль появится на канале.');
+  await ctx.reply('Спасибо, что поделился! В скором времени твоя мысль появится на канале');
 
   // 2. Шлём админу
   const kb = Markup.inlineKeyboard([
