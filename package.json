@@ -1,5 +1,6 @@
 {
-  "name": "anon-tg-publisher",
+  "name": "anonthink",
+  "version": "1.0.0",
   "dependencies": {
     "telegraf": "^4.15.0"
   }
