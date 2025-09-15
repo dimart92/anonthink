@@ -1,8 +1,8 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/webhook/(.*)",
-      "dest": "index.js"
+      "source": "/webhook/(.*)",
+      "destination": "/api/webhook"
     }
   ]
 }
