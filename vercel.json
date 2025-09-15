@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "main.py": {
+      "runtime": "vercel-python"
+    }
+  },
+  "routes": [
+    {
+      "src": "/webhook/(.*)",
+      "dest": "main.py"
+    }
+  ]
+}
