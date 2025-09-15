@@ -1,0 +1,2 @@
+aiogram==2.25.1
+vercel-python==0.1.0
