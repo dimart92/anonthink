@@ -58,7 +58,6 @@ let lastMsgId = null;   // message_id последнего поста в кан�
 
 // при публикации сохраняем ID
 bot.action(/^pub_(.+)/, async ctx => {
-  ...публикация...
   const sent = await bot.telegram.sendMessage(channelId, p.caption); // или sendPhoto и т.д.
   lastMsgId = sent.message_id;
   ...
