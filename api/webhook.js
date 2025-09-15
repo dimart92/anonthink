@@ -5,7 +5,7 @@ const adminId   = Number(process.env.ADMIN_ID);   // ваша цифра
 
 const pending = new Map(); // id → {msg, type, fileId, caption}
 
-bot.start(ctx => ctx.reply('Отправь anything → сначала админу, потом в канал.'));
+bot.start(ctx => ctx.reply('Поделись мыслью → опубликую анонимно.'));
 
 async function sendToAdmin(type, fileId, caption, fromId) {
   const kb = Markup.inlineKeyboard([
