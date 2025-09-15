@@ -6,7 +6,7 @@ TOKEN   = os.environ["8356896546:AAFvXuH97dQi6xKOQoWzbPyzU4xSdRCydZ4"]
 CHANNEL = int(os.environ["-1002909199388"])
 
 WEBHOOK_PATH = f'/webhook/{TOKEN}'
-WEBHOOK_URL  = os.environ["https://anonthink.vercel.app/"] + WEBHOOK_PATH
+WEBHOOK_URL  = os.environ["https://anonthink.vercel.app"] + WEBHOOK_PATH
 
 bot = Bot(token=8356896546:AAFvXuH97dQi6xKOQoWzbPyzU4xSdRCydZ4, parse_mode="HTML")
 dp  = Dispatcher(bot)
