@@ -1,4 +1,4 @@
-// api/webhook.js  – Kimi-Whisper + пре-модерация + статистика + бан + rate-limit
+// api/webhook.js – голос через Kimi, без openai
 const { Telegraf, Markup } = require('telegraf');
 
 const bot   = new Telegraf(process.env.TELEGRAM_TOKEN);
@@ -7,12 +7,11 @@ const adminId   = Number(process.env.ADMIN_ID);
 const kimiAuth  = process.env.KIMI_AUTH; // Bearer <jwt>
 
 /* ---------- хранилища ---------- */
-const pending   = new Map(); // key → {type, fileId, caption, voiceText}
-const cooldown  = new Map(); // userId → timestamp
+const pending   = new Map();
+const cooldown  = new Map();
 const banned    = new Set();
 const stats     = { total: 0, published: 0, rejected: 0 };
 
-/* ---------- helpers ---------- */
 const RATE_LIMIT_MS = 5000;
 const isAdmin = (id) => id === adminId;
 const isCool = (id) => {
@@ -23,14 +22,12 @@ const isCool = (id) => {
   return true;
 };
 
-/* ---------- Kimi Whisper ---------- */
+/* ---------- Kimi Whisper (НОВОЕ) ---------- */
 async function stt(fileLink) {
   try {
-    // 1. Скачиваем голос
     const voiceResp = await fetch(fileLink);
     const blob = await voiceResp.blob();
 
-    // 2. Pre-signed URL
     const preRes = await fetch('https://www.kimi.com/api/pre-sign-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': kimiAuth },
@@ -38,10 +35,8 @@ async function stt(fileLink) {
     });
     const { url, object_name } = await preRes.json();
 
-    // 3. Заливаем
     await fetch(url, { method: 'PUT', body: blob, headers: { 'Content-Type': 'audio/ogg' } });
 
-    // 4. Регистрируем файл
     const fileRes = await fetch('https://www.kimi.com/api/file', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': kimiAuth },
@@ -49,14 +44,12 @@ async function stt(fileLink) {
     });
     const { id: fileId } = await fileRes.json();
 
-    // 5. Парсинг
     await fetch('https://www.kimi.com/api/file/parse_process', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': kimiAuth },
       body: JSON.stringify({ ids: [fileId] })
     });
 
-    // 6. Ждём parsed
     let text = '';
     for (let i = 0; i < 20; i++) {
       const check = await fetch(`https://www.kimi.com/api/file/${fileId}`, {
@@ -76,10 +69,9 @@ async function stt(fileLink) {
   }
 }
 
-/* ---------- старт ---------- */
+/* ---------- приём контента ---------- */
 bot.start(ctx => ctx.reply('Присылай мысль – текст, фото, видео или голос!'));
 
-/* ---------- rate-limit + ban ---------- */
 bot.use((ctx, next) => {
   if (!ctx.message) return next();
   if (banned.has(ctx.from.id)) return;
@@ -87,7 +79,6 @@ bot.use((ctx, next) => {
   return next();
 });
 
-/* ---------- универсальный forward → админу ---------- */
 async function forwardToAdmin(type, fileId, caption, userMsgId, userId, voiceText = null) {
   const key = `${userMsgId}_${userId}`;
   const kb = Markup.inlineKeyboard([
@@ -115,7 +106,6 @@ async function forwardToAdmin(type, fileId, caption, userMsgId, userId, voiceTex
   pending.set(key, {type, fileId, caption, voiceText});
 }
 
-/* ---------- приём контента ---------- */
 bot.on('text', async ctx => {
   const txt = ctx.message.text;
   await ctx.reply('Спасибо, что поделился! В скором времени твоя мысль появится на канале.');
@@ -143,15 +133,12 @@ bot.on('document', async ctx => {
   await forwardToAdmin('document', fileId, cap, ctx.message.message_id, ctx.from.id);
 });
 
-/* ---------- ГОЛОСОВЫЕ (Kimi Whisper) ---------- */
 bot.on('voice', async ctx => {
   const fileId = ctx.message.voice.file_id;
   const cap = ctx.message.caption || '';
-
   await ctx.reply('🎙 Расшифровываю голос...');
   const fileLink = await bot.telegram.getFileLink(fileId);
   const voiceText = await stt(fileLink.href);
-
   await ctx.reply('Спасибо, что поделился! В скором времени твоя мысль появится на канале.');
   await forwardToAdmin('voice', fileId, cap, ctx.message.message_id, ctx.from.id, voiceText);
 });
@@ -186,7 +173,6 @@ bot.action(/^rej_(.+)/, async ctx => {
   await ctx.editMessageReplyMarkup({inline_keyboard: []});
 });
 
-/* ---------- правка текста ---------- */
 bot.action(/^edit_(.+)/, async ctx => {
   if (!isAdmin(ctx.from.id)) return ctx.answerCbQuery('Нет прав');
   const p = pending.get(ctx.match[1]);
@@ -215,7 +201,6 @@ bot.on('text', async ctx => {
   await forwardToAdmin('text', null, txt, ctx.message.message_id, ctx.from.id);
 });
 
-/* ---------- команды админа ---------- */
 bot.command('stats', ctx => {
   if (!isAdmin(ctx.from.id)) return;
   ctx.reply(`📊 Статистика:\nОпубликовано: ${stats.published}\nОтклонено: ${stats.rejected}\nВ бане: ${banned.size}`);
